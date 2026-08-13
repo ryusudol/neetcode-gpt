@@ -9,35 +9,34 @@ class Solution:
                               W2: List[List[float]], b2: List[float],
                               y_true: List[float]) -> dict:
         x, W1, b1, W2, b2, y_true = map(
-            lambda a: np.asarray(a, dtype=float),
-            (x, W1, b1, W2, b2, y_true)
+            lambda arr: np.asarray(arr, dtype=float),
+            [x, W1, b1, W2, b2, y_true]
         )
-
+        
         # Forward
-        z1 = W1 @ x + b1    # (hidden_size,)
-        act = np.maximum(0.0, z1)  # (hidden_size,)
-        z2 = W2 @ act + b2  # (output_size,)
+        z1 = W1 @ x + b1      # (hidden,)
+        a1 = np.maximum(0.0, z1)     # (hidden,)
+        y_hat = W2 @ a1 + b2  # (output,)
 
         # Loss
-        loss = np.mean(np.square(z2 - y_true))  # (output_size,)
+        L = np.mean(np.square(y_hat - y_true))
 
         # Backward
-        dz2 = 2.0 * (z2 - y_true) / y_true.size  # (output_size,)
-        dW2 = np.outer(dz2, act)  # (output_size, hidden_size)
-        db2 = dz2  # (output_size,)
-
-        dz1 = (W2.T @ dz2) * (z1 > 0)  # (hidden_size,)
-        dW1 = np.outer(dz1, x)  # (hidden_size, input_size)
-        db1 = dz1.copy()  # (hidden_size,)
+        dy_hat = 2.0 * (y_hat - y_true) / y_true.size  # (output,)
+        dW2 = np.outer(dy_hat, a1)  # (output, hidden)
+        db2 = dy_hat  # (output,)
+        dz1 = (W2.T @ dy_hat) * (z1 > 0)  # (hidden,)
+        dW1 = np.outer(dz1, x)  # (hidden, input)
+        db1 = dz1  # (hidden,)
 
         def clean(arr):
             arr = np.round(arr, 4)
             return np.where(arr == 0, 0.0, arr).tolist()
 
         return {
-            'loss': round(loss, 4),
-            'dW1' : clean(dW1),
-            'db1' : clean(db1),
-            'dW2' : clean(dW2),
-            'db2' : clean(db2),
+            'loss': round(L, 4),
+            'dW1': clean(dW1), 
+            'db1': clean(db1),
+            'dW2': clean(dW2),
+            'db2': clean(db2)
         }
