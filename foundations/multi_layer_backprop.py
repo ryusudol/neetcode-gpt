@@ -22,7 +22,7 @@ class Solution:
         L = np.mean(np.square(y_hat - y_true))
 
         # Backward
-        dy_hat = 2.0 * (y_hat - y_true) / y_true.size  # (output,)
+        dy_hat = 2.0 * (y_hat - y_true) / len(y_true)  # (output,)
         dW2 = np.outer(dy_hat, a1)  # (output, hidden)
         db2 = dy_hat  # (output,)
         dz1 = (W2.T @ dy_hat) * (z1 > 0)  # (hidden,)
