@@ -5,17 +5,17 @@ from typing import Tuple
 
 class Solution:
     def train(self, X: NDArray[np.float64], y: NDArray[np.float64], epochs: int, lr: float) -> Tuple[NDArray[np.float64], float]:
-        # X.shape = (n_samples, n_features), y.shape = (n_samples,)
-        W, b = np.zeros(X.shape[1]), 0  # W.shape = (n_features,)
+        # X.shape = (features,), y.shape = (n_samples,)
+        W, b = np.zeros(X.shape[1]), 0
 
         for _ in range(epochs):
-            y_hat = X @ W + b  # y_hat.shape = (n_samples,)
-            L = np.mean(np.square(y_hat - y))
+            y_hat = X @ W + b
+            diff = y_hat - y
 
-            dW = 2 / len(X) * (y_hat - y) @ X
-            db = 2 * np.mean(y_hat - y)
+            dW = 2 / len(X) * diff @ X
+            db = 2 * np.mean(diff)
 
             W -= lr * dW
             b -= lr * db
-
+        
         return (np.round(W, 5), round(b, 5))
