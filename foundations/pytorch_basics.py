@@ -11,7 +11,7 @@ class Solution:
         return torch.mean(to_avg, dim=0)
 
     def concatenate(self, cat_one: TensorType[float], cat_two: TensorType[float]) -> TensorType[float]:
-        return torch.cat((cat_one, cat_two), dim=1)
+        return torch.concat([cat_one, cat_two], dim=1)
 
     def get_loss(self, prediction: TensorType[float], target: TensorType[float]) -> TensorType[float]:
         return torch.nn.functional.mse_loss(prediction, target)
