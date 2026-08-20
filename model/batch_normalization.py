@@ -6,23 +6,16 @@ class Solution:
     def batch_norm(self, x: List[List[float]], gamma: List[float], beta: List[float],
                    running_mean: List[float], running_var: List[float],
                    momentum: float, eps: float, training: bool) -> Tuple[List[List[float]], List[float], List[float]]:
-        running_mean, running_var = map(
-            lambda a: np.array(a, dtype=float),
-            (running_mean, running_var)
-        )
-        
+        running_mean, running_var = np.array(running_mean), np.array(running_var)
+
         if training:
-            mean, var = np.mean(x, axis=0), np.var(x, axis=0)
-            x_hat = (x - mean) / np.sqrt(var + eps)
-            y = gamma * x_hat + beta
-            running_mean = (1 - momentum) * running_mean + momentum * mean
-            running_var = (1 - momentum) * running_var + momentum * var
+            avg, var = np.mean(x, axis=0), np.var(x, axis=0)
+            x_hat = (x - avg) / np.sqrt(var + eps)
+            running_mean = (1 - momentum) * running_mean + momentum * avg
+            running_var  = (1 - momentum) * running_var + momentum * var
         else:
             x_hat = (x - running_mean) / np.sqrt(running_var + eps)
-            y = gamma * x_hat + beta
-
-        return (
-            np.round(y, 4).tolist(),
-            np.round(running_mean, 4).tolist(),
-            np.round(running_var, 4).tolist()
-        )
+        
+        y = gamma * x_hat + beta
+        
+        return (np.round(y, 4), np.round(running_mean, 4), np.round(running_var, 4))
