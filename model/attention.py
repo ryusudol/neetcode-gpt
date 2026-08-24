@@ -8,20 +8,20 @@ class SingleHeadAttention(nn.Module):
         super().__init__()
         torch.manual_seed(0)
 
-        self.key = nn.Linear(embedding_dim, attention_dim, bias=False)
-        self.query = nn.Linear(embedding_dim, attention_dim, bias=False)
-        self.value = nn.Linear(embedding_dim, attention_dim, bias=False)
+        self.K = nn.Linear(embedding_dim, attention_dim, bias=False)
+        self.Q = nn.Linear(embedding_dim, attention_dim, bias=False)
+        self.V = nn.Linear(embedding_dim, attention_dim, bias=False)
 
     def forward(self, embedded: TensorType[float]) -> TensorType[float]:
-        k = self.key(embedded)
-        q = self.query(embedded)
-        v = self.value(embedded)
+        K = self.K(embedded)  # (batch_size, ctx_len, attention_dim)
+        Q = self.Q(embedded)  # (batch_size, ctx_len, attention_dim)
+        V = self.V(embedded)  # (batch_size, ctx_len, attention_dim)
 
-        ctx_len, attention_dim = k.shape[1], k.shape[2]
-        scores = (q @ torch.transpose(k, 1, 2)) / (attention_dim ** 0.5)
-        lower_triangular = torch.tril(torch.ones(ctx_len, ctx_len))
-        mask = lower_triangular == 0
-        scores = scores.masked_fill(mask, float('-inf'))
-        scores = nn.functional.softmax(scores, dim=2)
+        ctx_len, attention_dim = K.shape[1], K.shape[2]
+        scores = (Q @ torch.transpose(K, 1, 2)) / (attention_dim ** 0.5)  # (batch_Size, ctx_len, ctx_len)
+        lower_triangular = torch.tril(torch.ones(ctx_len, ctx_len))  # (ctx_len, ctx_len)
+        mask = lower_triangular == 0  # (ctx_len, ctx_len)
+        scores = scores.masked_fill(mask, float('-inf'))  # (batch_size, ctx_len, ctx_len)
+        scores = nn.functional.softmax(scores, dim=2)  # (batch_size, ctx_len, ctx_len)
 
-        return torch.round(scores @ v, decimals=4)
+        return torch.round(scores @ V, decimals=4)  # (batch_size, ctx_len, attention_dim)
